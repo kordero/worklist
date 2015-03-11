@@ -113,7 +113,6 @@ class ScanAssets {
         if (!empty($safe_path) && file_exists($real_path) && filesize($real_path) > 0 ) {
             // Execute the command.
             exec ($cmd, $out, $return);
-            error_log('VIRUS_SCAN: ' . $cmd . ' --- ' . $return);
             if ($return == 0) { //if clean update db
                 $sql = 'UPDATE `' . FILES . '` SET is_scanned = 1, scan_result = 0 WHERE `id` = ' . $id;
                 $notify = '';
