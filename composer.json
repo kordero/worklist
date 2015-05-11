@@ -5,7 +5,8 @@
         "twilio/twilio-php": "*",
         "michelf/php-markdown": "*",
         "knplabs/github-api": "*",
-        "kriswallsmith/Buzz": "*"
+        "kriswallsmith/Buzz": "*",
+        "mcrumm/phlack": "*"
     },
     "repositories": [
         {

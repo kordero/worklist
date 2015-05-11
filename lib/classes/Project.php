@@ -1,10 +1,13 @@
 <?php
-
 /**
  * Project
  *
  * @package Project
  */
+
+use Crummy\Phlack\Bridge\Guzzle\ApiClient;
+use Guzzle\Service\Description\ServiceDescription;
+
 class Project {
     protected $project_id;
     protected $name;
@@ -30,10 +33,9 @@ class Project {
     protected $require_sandbox;
     protected $repo_type;
     protected $creation_date;
-    protected $hipchat_enabled;
-    protected $hipchat_notification_token;
-    protected $hipchat_room;
-    protected $hipchat_color;
+    protected $slack_enabled;
+    protected $slack_token;
+    protected $slack_room;
     protected $github_repo_url;
     protected $github_id;
     protected $github_secret;
@@ -142,10 +144,9 @@ class Project {
                 p.internal,
                 p.require_sandbox,
                 p.creation_date,
-                p.hipchat_enabled,
-                p.hipchat_notification_token,
-                p.hipchat_room,
-                p.hipchat_color,
+                p.slack_enabled,
+                p.slack_token,
+                p.slack_room,
                 p.github_id,
                 p.github_secret
             FROM  ".PROJECTS. " as p
@@ -185,10 +186,9 @@ class Project {
              $this->setInternal($row['internal']);
              $this->setRequireSandbox($row['require_sandbox']);
              $this->setCreationDate($row['creation_date']);
-        $this->setHipchatEnabled($row['hipchat_enabled']);
-        $this->setHipchatNotificationToken($row['hipchat_notification_token']);
-        $this->setHipchatRoom($row['hipchat_room']);
-        $this->setHipchatColor($row['hipchat_color']);
+        $this->setSlackEnabled($row['slack_enabled']);
+        $this->setSlackToken($row['slack_token']);
+        $this->setSlackRoom($row['slack_room']);
         $this->setGithubId($row['github_id']);
         $this->setGithubSecret($row['github_secret']);
         return true;
@@ -444,45 +444,31 @@ class Project {
         return $this->creation_date;
     }
 
-    public function setHipchatNotificationToken($hipchat_notification_token) {
-        $this->hipchat_notification_token = $hipchat_notification_token;
+    public function setSlackToken($slack_token) {
+        $this->slack_token = $slack_token;
         return $this;
     }
 
-    public function getHipchatNotificationToken() {
-        return $this->hipchat_notification_token;
+    public function getSlackToken() {
+        return $this->slack_token;
     }
 
-    public function setHipchatEnabled($hipchat_enabled) {
-        $this->hipchat_enabled = $hipchat_enabled;
+    public function setSlackEnabled($slack_enabled) {
+        $this->slack_enabled = $slack_enabled;
         return $this;
     }
 
-    public function getHipchatEnabled() {
-        return $this->hipchat_enabled;
+    public function getSlackEnabled() {
+        return $this->slack_enabled;
     }
-    public function setHipchatRoom($hipchat_room) {
-        $this->hipchat_room = $hipchat_room;
+
+    public function setSlackRoom($slack_room) {
+        $this->slack_room = $slack_room;
         return $this;
     }
 
-    public function getHipchatRoom() {
-        return $this->hipchat_room;
-    }
-
-    public function setHipchatColor($hipchat_color) {
-        $this->hipchat_color = $hipchat_color;
-        return $this;
-    }
-
-    public function getHipchatColor() {
-        $hipchat_color = $this->hipchat_color;
-
-        if (in_array($hipchat_color, $this->getHipchatColorsArray())) {
-            return $hipchat_color;
-        }
-
-        return $this->getHipchatDefaultColor();
+    public function getSlackRoom() {
+        return $this->slack_room;
     }
 
     public function getGithubId() {
@@ -501,82 +487,41 @@ class Project {
         $this->github_secret = $github_secret;
     }
 
-    public function getHipchatColorsArray() {
-        return array(
-             "yellow",
-             "red",
-             "green",
-             "purple",
-             "gray",
-             "random"
+    public function slackNotify($content) {
+        $client = new ApiClient(array(
+            'username' => SLACK_USERNAME,
+            'token' => $this->getSlackToken()
+        ));
+
+        /**
+        * @todo: remove next call as well as it's corresponding "use" sentence for ServiceDescription (at
+        *        top of this file) and the /slack_api.json file in the root dir of this project once PR 9
+        *        for mcrumm/phlack is merged and ready in their master branch.
+        *        Reference: https://github.com/mcrumm/phlack/pull/9
+        */
+        $client->setDescription(ServiceDescription::factory(APP_PATH . '/slack_api.json'));
+
+        $channel = '#' . $this->getSlackRoom();
+        $bot_name = $this->getName() . ' @ Worklist';
+        $options = array(
+            'channel' => $channel,
+            'text' => $content,
+            'username' => $bot_name,
         );
-    }
-
-    public function getHipchatDefaultColor() {
-        $colors = $this->getHipchatColorsArray();
-        return $colors[0];
-    }
-
-    public function sendHipchat_notification($message, $message_format='html', $notify=0) {
-        $success = true;
-        $room_id = 0;
-        $token = $this->getHipchatNotificationToken();
-        $url = HIPCHAT_API_AUTH_URL . $token;
-
-        $response = CURLHandler::Get($url, array());
-        $response = json_decode($response);
-
-        if (count($response->rooms)) {
-            foreach($response->rooms as $key => $room) {
-                if ($room->name == trim($this->getHipchatRoom())) {
-                    $room_id = $room->room_id;
-                    break;
-                }
-            }
-
-            if ($room_id > 0 ) {
-                $url = HIPCHAT_API_MESSAGE_URL . $token;
-                $fields = array(
-                    'room_id' => $room_id,
-                    'from' => 'Worklist.net',
-                    'message' => $message,
-                    'message_format' => $message_format,
-                    'notify' => $notify,
-                    'color' => $this->getHipchatColor()
-                );
-
-                $result = CURLHandler::Post($url, $fields);
-                $result = json_decode($result);
-                if ($result->status != 'sent') {
-                    $success = false;
-                    $body = "Failed to send message: " . $message;
-                }
-            } else {
-                    $success = false;
-                    $body = "Failed to find room " . $this->getHipchatRoom() . ".";
-            }
-        } else {
-            $success = false;
-            $body = "Failed to authenticate to hipchat.";
+        if ($this->getLogo() && SERVER_NAME != 'localhost') {
+            $options['icon_url'] = SERVER_URL . 'uploads/' . $this->getLogo();
         }
-
-        if ($success == false) {
-            $email = $this->getContactInfo();
-            $subject = "HipChat Notification Failed";
-            if (!Utils::send_email($email, $subject, $body, $body, array('Cc' => OPS_EMAIL))) {
-               error_log("project-class.php: sendHipchat_notification : Utils::send_email failed");
-            }
-        }
+        $result = $client->PostMessage($option);
+        return $result['ok'] ? true : false;
     }
-
 
     protected function insert() {
         $query = "INSERT INTO " . PROJECTS . "
             (name, description, short_description, website, budget, repository, contact_info, active,
                 owner_id, testflight_enabled, testflight_team_token,
                 logo, last_commit, cr_anyone, cr_3_favorites, cr_project_admin,
-                cr_job_runner, cr_users_specified, internal, require_sandbox, creation_date, hipchat_enabled,
-                hipchat_notification_token, hipchat_room, hipchat_color, repo_type, github_id, github_secret) " .
+                cr_job_runner, cr_users_specified, internal, require_sandbox, creation_date, slack_enabled,
+                slack_token, slack_room, repo_type, github_id, github_secret) " .
             "VALUES (".
             "'".mysql_real_escape_string($this->getName())."', ".
             "'".mysql_real_escape_string($this->getDescription())."', ".
@@ -599,10 +544,9 @@ class Project {
             "'" . intval($this->getInternal()) . "', " .
             "'" . intval($this->getRequireSandbox()) . "', " .
             "NOW(), " .
-            "'" . intval($this->getHipchatEnabled()) . "', " .
-            "'" . mysql_real_escape_string($this->getHipchatNotificationToken()) . "', " .
-            "'" . mysql_real_escape_string($this->getHipchatRoom()) . "', " .
-            "'" . mysql_real_escape_string($this->getHipchatColor()) . "', " .
+            "'" . intval($this->getSlackEnabled()) . "', " .
+            "'" . mysql_real_escape_string($this->getSlackToken()) . "', " .
+            "'" . mysql_real_escape_string($this->getSlackRoom()) . "', " .
             "'" . mysql_real_escape_string($this->getRepo_type()) . "', " .
             "'" . mysql_real_escape_string($this->getGithubId()) . "', " .
             "'" . mysql_real_escape_string($this->getGithubSecret()) . "')";
@@ -653,10 +597,9 @@ class Project {
                 cr_users_specified='" . intval($this->getCrUsersSpecified()) . "',
                 internal='" . intval($this->getInternal()) . "',
                 require_sandbox='" . intval($this->getRequireSandbox()) . "',
-                hipchat_enabled='" . intval($this->getHipchatEnabled()) . "',
-                hipchat_notification_token='" . mysql_real_escape_string($this->getHipchatNotificationToken()) . "',
-                hipchat_room='" . mysql_real_escape_string($this->getHipchatRoom()) . "',
-                hipchat_color='" . mysql_real_escape_string($this->getHipchatColor()) . "'
+                slack_enabled='" . intval($this->getSlackEnabled()) . "',
+                slack_token='" . mysql_real_escape_string($this->getSlackToken()) . "',
+                slack_room='" . mysql_real_escape_string($this->getSlackRoom()) . "'
             WHERE project_id=" . $this->getProjectId();
         $result = mysql_query($query);
         return $result ? 1 : 0;

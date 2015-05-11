@@ -378,9 +378,8 @@ defineOnce('JOURNAL_BOT_SOUND',         0x04);
 defineOnce('JOURNAL_PING_SOUND',        0x02);
 defineOnce('JOURNAL_EMERGENCY_ALERT',   0x01);
 
-//Hipchat settings
-defineOnce('HIPCHAT_API_AUTH_URL', "https://api.hipchat.com/v1/rooms/list?auth_token=");
-defineOnce('HIPCHAT_API_MESSAGE_URL', "https://api.hipchat.com/v1/rooms/message?format=json&auth_token=");
+// Slack settings
+defineOnce('SLACK_USERNAME', '');
 
 //Tower api settings
 defineOnce('TOWER_API_URL', " https://a-tower.below92.com/");

@@ -59,16 +59,15 @@ class ProjectController extends Controller {
             $cr_job_runner = isset($_REQUEST['cr_job_runner']) ? 1 : 0;
             $internal = isset($_REQUEST['internal']) ? 1 : 0;
             $require_sandbox = isset($_REQUEST['require_sandbox']) ? 1 : 0;
-            $hipchat_enabled = isset($_REQUEST['hipchat_enabled']) ? 1 : 0;
+            $slack_enabled = isset($_REQUEST['slack_enabled']) ? 1 : 0;
             $project->setCrAnyone($cr_anyone);
             $project->setCrFav($cr_3_favorites);
             $project->setCrAdmin($cr_project_admin);
             $project->setCrRunner($cr_job_runner);
             $project->setCrUsersSpecified($cr_users_specified);
-            $project->setHipchatEnabled($hipchat_enabled);
-            $project->setHipchatNotificationToken($_REQUEST['hipchat_notification_token']);
-            $project->setHipchatRoom($_REQUEST['hipchat_room']);
-            $project->setHipchatColor($_REQUEST['hipchat_color']);
+            $project->setSlackEnabled($slack_enabled);
+            $project->setSlackToken($_REQUEST['slack_token']);
+            $project->setSlackRoom($_REQUEST['slack_room']);
             
             if ($user->getIs_admin()) {
                 $project->setInternal($internal);

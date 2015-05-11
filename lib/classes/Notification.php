@@ -556,14 +556,14 @@ class Notification {
 
 
     /**
-     *  This function sends notification to HipChat about updates of workitems
+     *  This function sends notification to Slack about updates of workitems
      *
      * @param Array $options - Array with options:
      * type - type of notification to send out
      * workitem - workitem object with updated data
      * @param Array $data - Array with additional data that needs to be passed on
      */
-    public static function workitemNotifyHipchat($options, $data = null) {
+    public static function workitemNotifySlack($options, $data = null) {
         $workitem = $options['workitem'];
 
         try {
@@ -575,17 +575,14 @@ class Notification {
             return;
         }
 
-        if (!$project->getHipchatEnabled()) {
+        if (!$project->getSlackEnabled()) {
             return;
         }
 
         $itemId = $workitem->getId();
         $itemLinkShort = '<a href="' . WORKLIST_URL . $itemId . '">#' . $itemId . '</a>';
         $itemLink = $itemLinkShort . ' - ' . $workitem->getSummary();
-
         $message = null;
-        $message_format = 'html';
-        $notify = 0;
 
         switch ($options['type']) {
             case 'comment':
@@ -684,7 +681,7 @@ class Notification {
         }
 
         if ($message) {
-            $project->sendHipchat_notification($message, $message_format, $notify);
+            $project->slackNotify($message);
         }
     }
 

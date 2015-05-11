@@ -56,23 +56,6 @@ class ProjectView extends View {
         return $this->project->getRoles($this->project->getProjectId());
     }
 
-    public function projectHipChatColorSelect() {
-        $project = $this->project;
-        $ret = '';
-        foreach ($project->getHipchatColorsArray() as $color) {
-            $selected = '';
-            if ($project->getHipchatColor() == $color) {
-                $selected = 'checked="checked"';
-            }
-            $ret .= 
-                '<div><label>' .
-                '<input name="hipchat_color" type="radio" ' . $selected . ' value="' . $color . '" />' .
-                  $color .
-                '</label></div>';
-        }
-        return $ret;
-    }
-
     public function showTestFlightButton() {
         $project = $this->project;
         return $this->runnerOrOwner() && $project->getTestFlightEnabled() && $project->getTestFlightTeamToken();

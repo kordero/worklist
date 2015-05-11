@@ -194,7 +194,7 @@ class JobController extends Controller {
                     );
 
                     Notification::workitemNotify($options, $data, false);
-                    Notification::workitemNotifyHipchat($options, $data);
+                    Notification::workitemNotifySlack($options, $data);
 
                     // workitem mentions
                     $matches = array();
@@ -391,7 +391,7 @@ class JobController extends Controller {
 
                 $status=$workitem->loadStatusByBidId($bid_id);
                 $data['new_update_message'] = $new_update_message;
-                Notification::workitemNotifyHipchat($options, $data);
+                Notification::workitemNotifySlack($options, $data);
 
             } else {
                 error_log("Input forgery detected for user $userId: attempting to $action.");
@@ -449,7 +449,7 @@ class JobController extends Controller {
 
                 // notify runner of new bid
                 Notification::workitemNotify($options, $data);
-                Notification::workitemNotifyHipchat($options, $data);
+                Notification::workitemNotifySlack($options, $data);
 
             }
             $redirectToDefaultView = true;
@@ -490,7 +490,7 @@ class JobController extends Controller {
                     Notification::workitemNotify($options, $data);
 
                     $data['nick'] = $_SESSION['nickname'];
-                    Notification::workitemNotifyHipchat($options, $data);
+                    Notification::workitemNotifySlack($options, $data);
 
                     // update budget
                     $runner = new User();
@@ -554,7 +554,7 @@ class JobController extends Controller {
 
                             $data = $bid_info;
                             $data['nick'] = $_SESSION['nickname'];
-                            Notification::workitemNotifyHipchat($options, $data);
+                            Notification::workitemNotifySlack($options, $data);
 
                             $bidder = new User();
                             $bidder->findUserById($bid_info['bidder_id']);
@@ -991,7 +991,7 @@ class JobController extends Controller {
                     'status' => $status
                 );
 
-                Notification::workitemNotifyHipchat($options, $data);
+                Notification::workitemNotifySlack($options, $data);
             }
 
             // workitem mentions
@@ -1113,7 +1113,7 @@ class JobController extends Controller {
             } else if ($status === true || (int) $status == 0) {
                 $journal_message = '@' . $user->getNickname() . ' has started a code review for #' . $id. ' ';
                 Utils::systemNotification($journal_message);
-                Notification::workitemNotifyHipchat(array(
+                Notification::workitemNotifySlack(array(
                     'type' => 'code-review-started',
                     'workitem' => $workitem,
                 ), array('nick' => $user->getNickname()));
@@ -1151,7 +1151,7 @@ class JobController extends Controller {
             $workitem->save();
             $journal_message = '@' . $user->getNickname() . ' has canceled their code review for #' . $id. ' ';
             Utils::systemNotification($journal_message);
-            Notification::workitemNotifyHipchat(array(
+            Notification::workitemNotifySlack(array(
                 'type' => 'code-review-canceled',
                 'workitem' => $workitem,
             ), array('nick' => $user->getNickname()));
@@ -1195,7 +1195,7 @@ class JobController extends Controller {
                 'recipients' => array('runner', 'mechanic', 'followers')
             );
             Notification::workitemNotify($options);
-            Notification::workitemNotifyHipchat($options, array(
+            Notification::workitemNotifySlack($options, array(
                 'nick' => $_SESSION['nickname']
             ));
             echo json_encode(array(
@@ -1388,7 +1388,7 @@ class JobController extends Controller {
                 'nick' => $user->getNickname(),
                 'status' => $newStatus,
             );
-            Notification::workitemNotifyHipchat($options, $data);
+            Notification::workitemNotifySlack($options, $data);
         }
         // notifications for subscribed users
         Notification::massStatusNotify($workitem);
@@ -1954,7 +1954,7 @@ class JobController extends Controller {
                     'related' => $related
                 );
                 Notification::workitemNotify($options, $data, false);
-                Notification::workitemNotifyHipchat($options, $data);
+                Notification::workitemNotifySlack($options, $data);
                 Utils::systemNotification($journal_message);
             }
 
@@ -2259,7 +2259,7 @@ class JobController extends Controller {
                     'nick' => $_SESSION['nickname'],
                     'fee_nick' => $user->getNickname()
                 );
-                Notification::workitemNotifyHipchat($options, $data);
+                Notification::workitemNotifySlack($options, $data);
             }
         }
     }

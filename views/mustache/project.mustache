@@ -184,27 +184,23 @@
                     </div>
                 </li>
             {{/codeReviewAdmin}}
-            <li id="hipchat">
-                <h3>HipChat</h3>
+            <li id="slack">
+                <h3>Slack</h3>
                 <div>
                     <div>
-                        <input type="checkbox" class="wlcheckbox" name="hipchat_enabled" id="hipchat_enabled"
+                        <input type="checkbox" class="wlcheckbox" name="slack_enabled" id="slack_enabled"
                             {{^edit_mode}}disabled="disabled"{{/edit_mode}}
-                            {{#project.getHipchatEnabled}}checked="checked"{{/project.getHipchatEnabled}} />
-                        <label for="hipchat_enabled">Enabled</label>
+                            {{#project.getSlackEnabled}}checked="checked"{{/project.getSlackEnabled}} />
+                        <label for="slack_enabled">Enabled</label>
                     </div>
                     {{#edit_mode}}
                         <div>
-                            <label for="hipchat_notification_token">Notification Token</label>
-                            <input type="text" name="hipchat_notification_token" id="hipchat_notification_token" value="{{project.getHipchatNotificationToken}}" />
+                            <label for="slack_token">Notification Token</label>
+                            <input type="text" name="slack_token" id="slack_token" value="{{project.getSlackToken}}" />
                         </div>
                         <div>
-                            <label for="hipchat_room">Room</label>
-                            <input type="text" id="hipchat_room" name="hipchat_room" value="{{project.getHipchatRoom}}" />                        
-                        </div>
-                        <div>
-                            <label for="hipchat_color">Message Color</label>
-                            {{& projectHipChatColorSelect}}
+                            <label for="slack_room">Room</label>
+                            <input type="text" id="slack_room" name="slack_room" value="{{project.getSlackRoom}}" />
                         </div>
                     {{/edit_mode}}
                 </div>
