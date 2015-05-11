@@ -494,7 +494,7 @@ class Project {
         ));
 
         /**
-        * @todo: remove next call as well as it's corresponding "use" sentence for ServiceDescription (at
+        * @todo: remove next call as well as its corresponding "use" sentence for ServiceDescription (at
         *        top of this file) and the /slack_api.json file in the root dir of this project once PR 9
         *        for mcrumm/phlack is merged and ready in their master branch.
         *        Reference: https://github.com/mcrumm/phlack/pull/9
